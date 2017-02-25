@@ -1,0 +1,33 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    volumes:
+      - ./postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    env_file:
+      - .env
+    volumes:
+      - /usr/src/app/static
+    expose:
+      - '5432'
+  service:
+    build: ./service/
+    env_file:
+      - .env
+    volumes: 
+      - service_static:/usr/src/app/static
+    links:
+      - postgres
+    expose:
+      - '8000'
+  nginx:
+    build: ./nginx/
+    volumes:
+      - service_static:/usr/src/app/static
+    links:
+      - service
+    ports:
+      - '80:80'
+
+volumes:
+  service_static:
